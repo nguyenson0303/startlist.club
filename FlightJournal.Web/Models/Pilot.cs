@@ -15,7 +15,10 @@ namespace FlightJournal.Web.Models
         {
             get
             {
-                return string.Format("{0} ({1})", this.Name, this.MemberId);
+                if (!string.IsNullOrWhiteSpace(this.MemberId))
+                    return string.Format("{0} ({1})", this.Name, this.MemberId);
+
+                return this.Name;
             }
         }
         public string UnionId { get; set; }
@@ -32,10 +35,7 @@ namespace FlightJournal.Web.Models
 
         public override string ToString()
         {
-            if (!string.IsNullOrWhiteSpace(this.MemberId))
-                return string.Format("{0} ({1})", this.Name, this.MemberId);
-
-            return this.Name;
+            return RenderName;
         }
 
         [XmlIgnore]
