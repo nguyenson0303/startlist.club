@@ -104,5 +104,21 @@ namespace FlightJournal.Web.Controllers
             db.Dispose();
             base.Dispose(disposing);
         }
+
+        public static void ImportPlanesFromTextarea(string importPlanes)
+        {
+            var planeNames = importPlanes.Split('\n');
+            FlightContext db = new FlightContext();
+            foreach (var planeName in planeNames)
+            {
+                if (db.Planes.Any(d => d.ShortName == planeName))
+                {
+                    continue;
+                }
+                var plane = new Plane() {CompetitionId = "_", Registration = "_", ShortName = planeName, Engines = 0, Seats = 1 };
+                db.Planes.Add(plane);
+                db.SaveChanges();
+            }
+        }
     }
 }

@@ -107,5 +107,22 @@ namespace FlightJournal.Web.Controllers
             db.Dispose();
             base.Dispose(disposing);
         }
+
+        public static void ImportPilotsFromTextarea(string import)
+        {
+            var names = import.Split('\n');
+            FlightContext db = new FlightContext();
+            var club = db.Clubs.FirstOrDefault(d => d.ShortName == "vgc2014");
+            foreach (var shortName in names)
+            {
+                if (db.Pilots.Any(d => d.Name == shortName))
+                {
+                    continue;
+                }
+                var pilot = new Pilot() { Name = shortName, Club = club };
+                db.Pilots.Add(pilot);
+                db.SaveChanges();
+            }
+        }
     }
 }
