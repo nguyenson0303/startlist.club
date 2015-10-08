@@ -1,0 +1,24 @@
+make npm work 
+https://www.npmjs.com/
+do we require https://www.python.org/downloads/ for functioning ?
+
+do we need npm and grunt, yeeaas ;) 
+npm 
+
+grunt 
+
+install angular and angular-ui
+https://angular-ui.github.io/bootstrap/
+https://docs.angularjs.org/misc/faq
+
+from npm, maybe from nuget ... ?
+
+Notice the typeahead 
+
+https://github.com/angular-ui/ui-grid
+Use grid for most editing instead of MVC Generated views... 
+
+Introduce localdb as default database
+http://www.asp.net/mvc/overview/getting-started/introduction/creating-a-connection-string
+
+
