@@ -29,7 +29,7 @@ namespace FlightJournal.Web.Models
             using (var context = new FlightContext())
             {
                 // TODO: Fetch flights from both OGN and Database and synchronize any differences. 
-                // If any 
+                // TODO: Create map from OGN to Flight so links can be managed.
             }
         }
 
