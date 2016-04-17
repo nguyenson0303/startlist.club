@@ -25,6 +25,13 @@ namespace FlightJournal.Web.Models
         }
         [Key]
         public Guid FlightId { get; set; }
+        
+        /// <summary>
+        /// Allows flight to be linked to OGNFlightLog entry
+        /// </summary>
+        // ReSharper disable once InconsistentNaming
+        public string OGNFlightLogId { get; set; }
+
         [LocalizedDisplayName("Date")]
         [DataType(DataType.Date)]
         public DateTime Date
