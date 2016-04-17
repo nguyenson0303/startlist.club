@@ -515,7 +515,7 @@ namespace FlightJournal.Web.Controllers
 
                 if (Request.Club().Location.RegisteredOgnFlightLogAirfield && flight != null)
                 {
-                    var ognFlights = OpenGliderNetworkManager.GetFlights(Request.Club().Location.ICAO, flight.Date);
+                    var ognFlights = OpenGliderNetworkController.GetFlights(Request.Club().Location.ICAO, flight.Date);
                     this.ViewBag.OgnFlightLog = ognFlights;
                 }
             }
