@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using FlightJournal.Web.Controllers;
@@ -9,6 +10,13 @@ namespace FlightJournal.Tests.Controllers
     [TestClass()]
     public class OpenGliderNetworkControllerTests
     {
+        //[TestInitialize()]
+        //public static void SetUp()
+        //{
+        //    http://stackoverflow.com/questions/12244495/how-to-set-up-localdb-for-unit-tests-in-visual-studio-2012-and-entity-framework
+        //    AppDomain.CurrentDomain.SetData("DataDirectory", Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ""));
+        //}
+
         [TestMethod()]
         public void SynchronizeTest()
         {
@@ -20,8 +28,8 @@ namespace FlightJournal.Tests.Controllers
 
             using (var context = new FlightContext())
             {
-                var location = context.Locations.SingleOrDefault(l => l.ICAO == icao && l.RegisteredOgnFlightLogAirfield);
-                Assert.IsNotNull(location);
+                var location = context.Locations.SingleOrDefault(l => l.ICAO == icao && l.RegisteredOgnFlightLogAirfield); 
+                Assert.IsNotNull(location, icao + " is not available as a registered ogn flightlog location");
 
                 foreach (var flight in context.Flights.Where(s =>
                     (s.Date == date) &&
@@ -39,8 +47,8 @@ namespace FlightJournal.Tests.Controllers
                     (s.LandedOn.LocationId == location.LocationId
                      || s.StartedFrom.LocationId == location.LocationId));
 
-
-                Assert.IsTrue(ogn.Count == syncedFlights.Count());
+                var synced = syncedFlights.Count();
+                Assert.IsTrue(ogn.Count == synced, "OGN count does not match synced count");
             }
         }
     }

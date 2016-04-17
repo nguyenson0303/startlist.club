@@ -45,6 +45,10 @@ namespace FlightJournal.Web.Controllers
 
                 var ognFlights = GetFlights(icao, date);
 
+                foreach (var ognFlight in ognFlights)
+                {
+                    // 
+                }
                 // TODO: Fetch flights from both OGN and Database and synchronize any differences. 
                 // TODO: Create map from OGN to Flight so links can be managed.
             }

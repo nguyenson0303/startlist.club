@@ -52,11 +52,11 @@ namespace FlightJournal.Web.Migrations.FlightContext
             context.SaveChanges();
 
             // Locations
-            var location = new Location { Name = "Kongsted", Country = "DK", ICAO = "EKKL" };
+            var location = new Location { Name = "Kongsted", Country = "DK", ICAO = "EKKS", RegisteredOgnFlightLogAirfield = true};
             context.Locations.Add(location);
             var location2 = new Location { Name = "True", Country = "DK"};
             context.Locations.Add(location2);
-            var location3 = new Location { Name = "Slaglille", Country = "DK", ICAO = "EKSL" };
+            var location3 = new Location { Name = "Slaglille", Country = "DK", ICAO = "EKSL", RegisteredOgnFlightLogAirfield = true };
             context.Locations.Add(location3);
             var location4 = new Location { Name = "Tølløse" };
             context.Locations.Add(location4);
