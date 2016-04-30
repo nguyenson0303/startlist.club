@@ -23,7 +23,12 @@ namespace FlightJournal.Web.Controllers
                 foreach (var icao in context.Clubs.Where(c=>c.Location.RegisteredOgnFlightLogAirfield).Select(x=>x.Location.ICAO))
                 {
                     // Insert a little latency on each request for controlling load on open glider network
+#if DEBUG
+                    BackgroundJob.Schedule(() => Synchronize(icao, DateTime.Today.AddDays(-1)), TimeSpan.FromSeconds(30));
+#else
                     BackgroundJob.Schedule(() => Synchronize(icao, DateTime.Today.AddDays(-1)), TimeSpan.FromMinutes(5));
+#endif
+
                 }
             }
         }
@@ -47,10 +52,86 @@ namespace FlightJournal.Web.Controllers
 
                 foreach (var ognFlight in ognFlights)
                 {
-                    // 
+                    if (!ognFlight.takeoff.HasValue) continue;
+                    if (flights.Any(f => f.OGNFlightLogId == ognFlight.ID && f.Landing != null)) continue;
+
+                    // Flight has been created in earlier run and we only need to register the landing time if available and if not allready set. 
+                    if (flights.Any(f => f.OGNFlightLogId == ognFlight.ID))
+                    {
+                        // have we created the flight and added an ogn flight log id ?
+                        var flight = flights.SingleOrDefault(f => f.OGNFlightLogId == ognFlight.ID);
+                        // have we registered the landing
+                        if (flight == null) continue;
+                        if (flight.Landing != null) continue;
+                        if (!ognFlight.glider_landing.HasValue) continue;
+
+                        flight.Landing = ognFlight.glider_landing.Value.DateTime;
+                        if (flight.LandedOn == null) flight.LandedOn = location;
+
+                        context.SaveChanges();
+                        continue;
+                    }
+
+                    // register to any flights lined up with no set departure time
+                        // having '-' in the plane name means the flight is on a registered plane, map to the registered aircraft
+                        if (ognFlight.plane.Contains("-"))
+                        {
+                            // are there plane registrations, not bound to a ognflight, without a departure time
+                            if (flights.Any(f => string.IsNullOrWhiteSpace(f.OGNFlightLogId) && !f.Departure.HasValue && String.Equals(f.Plane.Registration, ognFlight.plane, StringComparison.CurrentCultureIgnoreCase)))
+                            {
+                                var flight = flights.FirstOrDefault(f=>string.IsNullOrWhiteSpace(f.OGNFlightLogId) && !f.Departure.HasValue && String.Equals(f.Plane.Registration, ognFlight.plane, StringComparison.CurrentCultureIgnoreCase));
+                                if (flight == null) continue;
+                                flight.OGNFlightLogId = ognFlight.ID;
+                                flight.Departure = ognFlight.takeoff.Value.DateTime;
+
+                                if (ognFlight.glider_landing.HasValue && flight.Landing == null)
+                                {
+                                    flight.Landing = ognFlight.glider_landing.Value.DateTime;
+                                }
+
+                                context.SaveChanges();
+                                continue;
+                            }
+                        }
+                        else if (!ognFlight.plane.Contains("-"))
+                        {
+                            // are there registrations not bound to a ognflight, without a departure time
+                            if (flights.Any(f => string.IsNullOrWhiteSpace(f.OGNFlightLogId) && !f.Departure.HasValue))
+                            {
+                                var flight = flights.FirstOrDefault(f => string.IsNullOrWhiteSpace(f.OGNFlightLogId) && !f.Departure.HasValue);
+                                if (flight == null) continue;
+
+                                flight.OGNFlightLogId = ognFlight.ID;
+                                flight.Departure = ognFlight.takeoff.Value.DateTime;
+
+                                if (ognFlight.glider_landing.HasValue && flight.Landing == null)
+                                {
+                                    flight.Landing = ognFlight.glider_landing.Value.DateTime;
+                                }
+
+                                context.SaveChanges();
+                                continue;
+                            }
+                        }
+                    
+                    // if we are still here, we are a flight that is not registered and not lined up for flight
+                    var newflight = new Flight()
+                    {
+                        OGNFlightLogId = ognFlight.ID,
+                        Departure = ognFlight.takeoff.Value.DateTime,
+                        StartedFrom = location
+                    };
+
+                    if (ognFlight.glider_landing.HasValue)
+                    {
+                        newflight.Landing = ognFlight.glider_landing.Value.DateTime;
+                        newflight.LandedOn = location;
+                    }
+
+                    context.Flights.Add(newflight);
+                    context.SaveChanges();
+                    continue;
                 }
-                // TODO: Fetch flights from both OGN and Database and synchronize any differences. 
-                // TODO: Create map from OGN to Flight so links can be managed.
             }
         }
 
