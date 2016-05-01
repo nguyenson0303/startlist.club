@@ -2,6 +2,8 @@
 using System.Web.UI.WebControls;
 using FlightJournal.Web.Translations;
 using Microsoft.Ajax.Utilities;
+using System.Linq;
+using System.Xml.Serialization;
 
 namespace FlightJournal.Web.Models
 {
@@ -29,6 +31,7 @@ namespace FlightJournal.Web.Models
         public DateTime LastUpdatedTimestamp { get; set; }
         [LocalizedDisplayName("Last updated by")]
         public string LastUpdatedBy { get; set; }
+
         public override string ToString()
         {
             return ToString(string.Empty);
@@ -52,6 +55,30 @@ namespace FlightJournal.Web.Models
                 return this.Name + " (" + Country + ")";
 
             return Name;
+        }
+
+
+        [XmlIgnore]
+        public static Location Missing
+        {
+            get
+            {
+                using (var context = new FlightContext())
+                {
+                    var missing = context.Locations.SingleOrDefault(p => p.LocationId == -2);
+                    if (missing != null)
+                        return missing;
+
+                    // Add missing missing Club for Unknown Pilot (System pilot)
+                    context.Database.ExecuteSqlCommand("SET IDENTITY_INSERT [dbo].[Locations] ON");
+                    missing = new Location() {LocationId = -2, Name = "???", CreatedBy = "System", CreatedTimestamp = DateTime.Now };
+                    context.Locations.Add(missing);
+                    context.SaveChanges();
+                    context.Database.ExecuteSqlCommand("SET IDENTITY_INSERT [dbo].[Locations] OFF");
+
+                    return missing;
+                }
+            }
         }
     }
 }

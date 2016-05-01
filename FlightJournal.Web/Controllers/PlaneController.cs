@@ -14,7 +14,7 @@ namespace FlightJournal.Web.Controllers
 
         public ViewResult Index()
         {
-            var planes = db.Planes.Include(p => p.DefaultStartType);
+            var planes = db.Planes.Where(p=>p.PlaneId > 0).Include(p => p.DefaultStartType); // Remove system plane -1: unknown
             return View(planes.ToList());
         }
 

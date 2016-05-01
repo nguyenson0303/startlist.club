@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Xml.Serialization;
 using FlightJournal.Web.Controllers;
 using FlightJournal.Web.Translations;
+using System.Linq;
 
 namespace FlightJournal.Web.Models
 {
@@ -57,5 +58,28 @@ namespace FlightJournal.Web.Models
                 return Location != null ? Location.Country : null;
             }
         }
+
+        [XmlIgnore]
+        public static Club Missing
+        {
+            get
+            {
+                using (var context = new FlightContext())
+                {
+                    var missing = context.Clubs.SingleOrDefault(p => p.ClubId == -2);
+                    if (missing != null)
+                        return missing;
+
+                    // Add missing missing Club for Unknown Pilot (System pilot)
+                    context.Database.ExecuteSqlCommand("SET IDENTITY_INSERT [dbo].[Clubs] ON");
+                    missing = new Club() {ClubId = -2, Name = "???", Location = Models.Location.Missing};
+                    context.Clubs.Add(missing);
+                    context.SaveChanges();
+                    context.Database.ExecuteSqlCommand("SET IDENTITY_INSERT [dbo].[Clubs] ON");
+
+                    return missing;
+                }
+            }
+        } 
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -39,7 +40,8 @@ namespace FlightJournal.Tests.Controllers
                     context.Flights.Remove(flight);    
                 }
                 context.SaveChanges();
-
+                
+                Debug.WriteLine("sync icao:{0} date:{1}", icao, date);
                 OpenGliderNetworkController.Synchronize(icao, date);
 
                 var syncedFlights = context.Flights.Where(s =>
@@ -50,6 +52,34 @@ namespace FlightJournal.Tests.Controllers
                 var synced = syncedFlights.Count();
                 Assert.IsTrue(ogn.Count == synced, "OGN count does not match synced count");
             }
+        }
+
+        [TestMethod()]
+        public void MissingLocationTest()
+        {
+            var location = Location.Missing;
+            Assert.AreEqual(location.LocationId,-2);
+        }
+
+        [TestMethod()]
+        public void MissingClubTest()
+        {
+            var club = Club.Missing;
+            Assert.AreEqual(club.ClubId, -2);
+        }
+
+        [TestMethod()]
+        public void UnknownPilotTest()
+        {
+            var pilot = Pilot.Unknown;
+            Assert.AreEqual(pilot.PilotId, -1);
+        }
+
+        [TestMethod()]
+        public void UnknownPlaneTest()
+        {
+            var plane = Plane.Unknown;
+            Assert.AreEqual(plane.PlaneId, -1);
         }
     }
 }

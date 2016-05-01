@@ -183,7 +183,7 @@ namespace FlightJournal.Web.Controllers
         // GET: /Club/
         public ViewResult Index()
         {
-            return View(db.Clubs.ToList());
+            return View(db.Clubs.Where(c=> c.ClubId > 0).ToList()); // hide system club for missing -2 or unknown club -1
         }
 
         //

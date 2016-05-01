@@ -20,7 +20,7 @@ namespace FlightJournal.Web.Controllers
 
         public ViewResult Index()
         {
-            return View(db.Locations.OrderBy(t=>t.Name).ToList());
+            return View(db.Locations.Where(l=>l.LocationId > 0).OrderBy(t=>t.Name).ToList()); // Remove System location -2 "???" missing location
         }
 
         //

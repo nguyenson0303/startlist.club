@@ -23,7 +23,7 @@ namespace FlightJournal.Web.Controllers
         {
             if (!User.IsManager()) return RedirectToAction("Restricted", "Error", new { message = "Restricted to your own club" });
 
-            var pilots = db.Pilots.Include(p => p.Club);
+            var pilots = db.Pilots.Where(p=>p.PilotId > 0).Include(p => p.Club);    // Remove system pilot -1: unknown
             if (Request.IsClub())
             {
                 var clubid = Request.Club().ClubId;

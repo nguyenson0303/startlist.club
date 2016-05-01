@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Xml.Serialization;
 using FlightJournal.Web.Translations;
+using System.Linq;
 
 namespace FlightJournal.Web.Models
 {
@@ -85,6 +86,29 @@ namespace FlightJournal.Web.Models
         public override string ToString()
         {
             return this.RenderName;
+        }
+
+        [XmlIgnore]
+        public static Plane Unknown
+        {
+            get
+            {
+                using (var context = new FlightContext())
+                {
+                    var unknown = context.Planes.SingleOrDefault(p => p.PlaneId == -1);
+                    if (unknown != null)
+                        return unknown;
+
+                    // Add missing Unknown Pilot (System pilot)
+                    context.Database.ExecuteSqlCommand("SET IDENTITY_INSERT [dbo].[Planes] ON");
+                    unknown = new Plane() {PlaneId = -1, Registration = "???", CompetitionId = "??", Seats = 1 , Type = "???", Class = "???", CreatedBy = "System", CreatedTimestamp = DateTime.Now };
+                    context.Planes.Add(unknown);
+                    context.SaveChanges();
+                    context.Database.ExecuteSqlCommand("SET IDENTITY_INSERT [dbo].[Planes] OFF");
+
+                    return unknown;
+                }
+            }
         }
     }
 }

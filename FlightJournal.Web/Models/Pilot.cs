@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Web;
 using System.Xml.Serialization;
 using Microsoft.AspNet.Identity;
@@ -91,5 +92,25 @@ namespace FlightJournal.Web.Models
         [XmlIgnore]
         public virtual ICollection<FlightVersionHistory> FlightHistory_Betalers { get; set; }
 
+        [XmlIgnore]
+        public static Pilot Unknown {
+            get {
+                using (var context = new FlightContext())
+                {
+                    var unknown = context.Pilots.SingleOrDefault(p => p.PilotId == -1);
+                    if (unknown != null)
+                        return unknown;
+
+                    // Add missing Unknown Pilot (System pilot)
+                    context.Database.ExecuteSqlCommand("SET IDENTITY_INSERT [dbo].[Pilots] ON");
+                    unknown = new Pilot() {PilotId = -1, Name = "???", Club = Models.Club.Missing };
+                    context.Pilots.Add(unknown);
+                    context.SaveChanges();
+                    context.Database.ExecuteSqlCommand("SET IDENTITY_INSERT [dbo].[Pilots] OFF");
+
+                    return unknown;
+                }
+            }
+        }
     }
 }

@@ -77,9 +77,9 @@ namespace FlightJournal.Web.Controllers
                         if (ognFlight.plane.Contains("-"))
                         {
                             // are there plane registrations, not bound to a ognflight, without a departure time
-                            if (flights.Any(f => string.IsNullOrWhiteSpace(f.OGNFlightLogId) && !f.Departure.HasValue && String.Equals(f.Plane.Registration, ognFlight.plane, StringComparison.CurrentCultureIgnoreCase)))
+                            if (flights.Any(f => (f.OGNFlightLogId == null || f.OGNFlightLogId.Equals(string.Empty)) && !f.Departure.HasValue && f.Plane.Registration.Equals(ognFlight.plane, StringComparison.CurrentCultureIgnoreCase)))
                             {
-                                var flight = flights.FirstOrDefault(f=>string.IsNullOrWhiteSpace(f.OGNFlightLogId) && !f.Departure.HasValue && String.Equals(f.Plane.Registration, ognFlight.plane, StringComparison.CurrentCultureIgnoreCase));
+                                var flight = flights.FirstOrDefault(f=> (f.OGNFlightLogId == null || f.OGNFlightLogId.Equals(string.Empty)) && !f.Departure.HasValue && String.Equals(f.Plane.Registration, ognFlight.plane, StringComparison.CurrentCultureIgnoreCase));
                                 if (flight == null) continue;
                                 flight.OGNFlightLogId = ognFlight.ID;
                                 flight.Departure = ognFlight.takeoff.Value.DateTime;
@@ -96,9 +96,9 @@ namespace FlightJournal.Web.Controllers
                         else if (!ognFlight.plane.Contains("-"))
                         {
                             // are there registrations not bound to a ognflight, without a departure time
-                            if (flights.Any(f => string.IsNullOrWhiteSpace(f.OGNFlightLogId) && !f.Departure.HasValue))
+                            if (flights.Any(f => (f.OGNFlightLogId == null || f.OGNFlightLogId.Equals(string.Empty)) && !f.Departure.HasValue))
                             {
-                                var flight = flights.FirstOrDefault(f => string.IsNullOrWhiteSpace(f.OGNFlightLogId) && !f.Departure.HasValue);
+                                var flight = flights.FirstOrDefault(f => (f.OGNFlightLogId == null || f.OGNFlightLogId.Equals(string.Empty)) && !f.Departure.HasValue);
                                 if (flight == null) continue;
 
                                 flight.OGNFlightLogId = ognFlight.ID;
@@ -113,14 +113,26 @@ namespace FlightJournal.Web.Controllers
                                 continue;
                             }
                         }
-                    
+
                     // if we are still here, we are a flight that is not registered and not lined up for flight
+
                     var newflight = new Flight()
                     {
                         OGNFlightLogId = ognFlight.ID,
                         Departure = ognFlight.takeoff.Value.DateTime,
-                        StartedFrom = location
+                        StartedFrom = location,
+                        Pilot = Pilot.Unknown,
+                        Betaler = Pilot.Unknown,
+                        Plane = Plane.Unknown
                     };
+
+                    context.SaveChanges();
+
+                    // Detect if we have a known plane in the startlist.club system otherwise create the plane or create a note 
+                    if (ognFlight.plane.Contains("-"))
+                    {
+                        //newflight.Plane
+                    }
 
                     if (ognFlight.glider_landing.HasValue)
                     {

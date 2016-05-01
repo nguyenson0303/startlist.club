@@ -45,6 +45,8 @@ namespace FlightJournal.Web.Models
             this.LandedOnId = f.LandedOnId;
             this.TachoDeparture = f.TachoDeparture;
             this.TachoLanding = f.TachoLanding;
+
+            this.OGNFlightLogId = f.OGNFlightLogId;
         }
 
         [Key]
@@ -53,6 +55,12 @@ namespace FlightJournal.Web.Models
         [Key]
         [Column(Order = 1)]
         public DateTime Created { get; set; }
+        /// <summary>
+        /// Allows flight to be linked to OGNFlightLog entry
+        /// </summary>
+        // ReSharper disable once InconsistentNaming
+        public string OGNFlightLogId { get; set; }
+        
         public string State { get; set; }
         [DataType(DataType.Date)]
         public DateTime Date { get; set; }
